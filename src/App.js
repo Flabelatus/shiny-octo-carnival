@@ -1,22 +1,30 @@
 // functional component
-import React, {Fragment, useEffect, useState} from "react";
+import React, {Fragment, useEffect, useRef, useState} from "react";
 import "./App.css"
 import Input from "./Input";
 
-function HelloWorld(props) {
+function BasicForm(props) {
 
     // States
     // Define a constant [variable name, Built-in Function] = useState(initial value of false)
     const [myVariable, setIsTrue] = useState(false);
-    const [crowd, setCrowd] = useState([]);
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setlasttName] = useState("");
-    const [dob, setDob] = useState("");
+    const [crowd, setCrowdState] = useState([]);
+    const [firstName, setFirstNameState] = useState("");
+    const [lastName, setlasttNameState] = useState("");
+    const [dob, setDobState] = useState("");
+
+    // refs
+    const firstNameRef = useRef(null);
+    const lastNameRef = useRef(null);
+    const dobRef = useRef(null);
 
     const handleSubmit = (event) => {
         event.preventDefault();
 
-        console.log({firstName}, {lastName}, {dob})
+        // console.log({firstName}, {lastName}, {dob})
+        if (lastName !== "") {
+            addPerson(firstName, lastName, dob)
+        }
     }
 
     // Declare the function for toggle here
@@ -27,6 +35,37 @@ function HelloWorld(props) {
         };
         setIsTrue(true);
     };
+
+    // Function to add person to the list
+    const addPerson = (newFirst, newLast, newDOB) => {
+        // create the new person person
+        let newPerson = {
+            id: crowd.length + 1,
+            firstName: newFirst,
+            lastName: newLast,
+            dob: newDOB
+        }
+
+        const newList = crowd.concat(newPerson);
+
+        const sorted = newList.sort((a, b) => {
+            if (a.lastName < b.lastName) {
+                return -1;
+            } else if (a.lastName > b.lastName) {
+                return 1;
+            }
+            return 0;
+        })
+
+        setCrowdState(sorted);
+        setFirstNameState("");
+        setlasttNameState("");
+        setDobState("");
+
+        firstNameRef.current.value = "";
+        lastNameRef.current.value = "";
+        dobRef.current.value = "";
+    }
 
     // Use of a Hook
     useEffect(() => {
@@ -47,10 +86,8 @@ function HelloWorld(props) {
                 dob: "1999-02-04",
             }
         ]
-        setCrowd(people);
+        setCrowdState(people);
     }, []);
-
-    
 
     return(
         // put the Heading inside the parent Fragment
@@ -76,41 +113,44 @@ function HelloWorld(props) {
             }
 
             <hr />
-            {/* Button */}
+
+            {/* Submit Button */}
             <a href="#!" className="btn btn-outline-secondary" onClick={toggleTrue}>
                 Toggle
             </a>
+
             <hr />
                 <form autoComplete="off" onSubmit={handleSubmit}>
-                    <div className="mb-3">
-                        <label className="form-label" htmlFor="first-name">First Name</label>
-                        <input
-                            type="text"
-                            name="first-name"
-                            id="first-name"
-                            autoComplete="first-name-new"
-                            className="form-control"
-                            onChange={(event) => setFirstName(event.target.value)}
-                        ></input>
-                    </div>
-
+ 
                     {/* import the Input.js */}
+                    <Input
+                        title="First Name"
+                        type="text"
+                        name="first-name"
+                        ref={firstNameRef}
+                        autoComplete="first-name-new"
+                        className="form-control"
+                        onChange={(event) => setFirstNameState(event.target.value)}
+                    ></Input>
+
                     <Input
                         title="Last Name"
                         type="text"
+                        ref={lastNameRef}
                         name="last-name"
                         autoComplete="last-name-new"
                         className="form-control"
-                        onChange={(event) => setlasttName(event.target.value)}
+                        onChange={(event) => setlasttNameState(event.target.value)}
                     ></Input>
 
                     <Input
                         title="Date of Birth"
                         type="date"
+                        ref={dobRef}
                         name="dob"
                         autoComplete="dob-new"
                         className="form-control"
-                        onChange={(event) => setDob(event.target.value)}
+                        onChange={(event) => setDobState(event.target.value)}
                     ></Input>
 
                     <input type="submit" value="Submit" className="btn btn-primary"></input>
@@ -120,6 +160,7 @@ function HelloWorld(props) {
                 <br></br>
                 <br></br>
                 
+                {/* Showing values on the page */}
                 <div>
                     First Name: {firstName}<br />
                     Last Name: {lastName}<br />
@@ -140,4 +181,4 @@ function HelloWorld(props) {
     )
 }
 
-export default HelloWorld;
+export default BasicForm;
